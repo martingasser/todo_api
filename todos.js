@@ -1,11 +1,13 @@
 const express = require('express')
 const router = express.Router()
+var SSE = require('express-sse')
 
 const path = require('path')
 const fs = require('fs').promises
 const databaseFilename = path.join('.', 'db', 'todos.json')
-
 const fs_ = require('fs')
+
+const sse = new SSE()
 
 if (! fs_.existsSync(path.join('.', 'db'))) {
     fs_.mkdirSync(path.join('.', 'db'))
@@ -20,7 +22,10 @@ router.get('/', (req, res) => {
     })
 })
 
-router.get('/:id', (req, res) => {
+router.get('/events', sse.init)
+
+
+router.get('/:id(\\d+)', (req, res) => {
     fs.readFile(databaseFilename)
     .then(file => {
         const database = JSON.parse(file)
@@ -35,6 +40,36 @@ router.get('/:id', (req, res) => {
     })
 })
 
+router.put('/:id(\\d+)', (req, res) => {
+    const todo = req.body
+
+    fs.readFile(databaseFilename)
+    .then(file => {
+        const database = JSON.parse(file)
+        const found = database.data.find(t => (t.id == req.params.id))
+
+        if (found === undefined) {
+            database.data.push(todo)
+        } else {
+            database.data = database.data.map(t => {
+                if (t.id == req.params.id) {
+                    return { ...t, ...todo }
+                }
+                return t
+            })
+        }
+
+        return fs.writeFile(databaseFilename, JSON.stringify(database))
+    })
+    .then(() => {
+        res.json({
+            message: 'ok'
+        })
+        sse.send('update')
+    })
+})
+
+
 router.post('/', (req, res) => {
     const todo = req.body
     todo.id = Date.now()
@@ -43,16 +78,17 @@ router.post('/', (req, res) => {
     .then(file => {
         const database = JSON.parse(file)
         database.data.push(todo)
-        return fs.writeFile(databaseFilename, JSON.stringify(database))        
+        return fs.writeFile(databaseFilename, JSON.stringify(database))
     })
     .then(() => {
         res.json({
             message: 'ok'
         })
+        sse.send('update')
     })
 })
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id(\\d+)', (req, res) => {
     fs.readFile(databaseFilename)
     .then(file => {
         let database = JSON.parse(file)
@@ -64,6 +100,7 @@ router.delete('/:id', (req, res) => {
                 res.json({
                     message: 'ok'
                 })
+                sse.send('update')
             })        
         } else {
             res.status(404).json({
