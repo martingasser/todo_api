@@ -14,6 +14,8 @@ if (! fs_.existsSync(path.join('.', 'db'))) {
     fs_.writeFileSync(path.join('.', 'db', 'todos.json'), JSON.stringify({"data": []}))
 }
 
+router.get('/events', sse.init)
+
 router.get('/', (req, res) => {
     fs.readFile(databaseFilename)
     .then(file => {
@@ -21,8 +23,6 @@ router.get('/', (req, res) => {
         res.json(database.data)
     })
 })
-
-router.get('/events', sse.init)
 
 
 router.get('/:id(\\d+)', (req, res) => {
@@ -42,6 +42,7 @@ router.get('/:id(\\d+)', (req, res) => {
 
 router.put('/:id(\\d+)', (req, res) => {
     const todo = req.body
+    todo.id = req.params.id
 
     fs.readFile(databaseFilename)
     .then(file => {
