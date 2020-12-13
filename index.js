@@ -4,10 +4,9 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const todos = require('./todos')
-const chat = require('./chat')
 
 const corsOptions = {
-    origin: 'http://localhost:8081'
+    origin: 'http://localhost:8080'
 }
 
 app.use(cors(corsOptions))
@@ -16,15 +15,19 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use('/todos', todos)
 
+app.get('/', (req, res) => {
+    res.json({
+        message: 'Welcome to Todo API'
+    })
+})
+
 const http = require('http').createServer(app)
 
-const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT || 8081
 
 const server = http.listen(PORT, () => {
     console.log(`Server running on port ${PORT}.`)
 })
-
-chat(server)
 
 function exitHandler(exitCode) {
     process.exit();
