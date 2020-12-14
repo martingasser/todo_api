@@ -1,20 +1,15 @@
 const express = require('express')
 const router = express.Router()
-var SSE = require('express-sse')
 
 const path = require('path')
 const fs = require('fs').promises
 const databaseFilename = path.join('.', 'db', 'todos.json')
 const fs_ = require('fs')
 
-const sse = new SSE()
-
 if (! fs_.existsSync(path.join('.', 'db'))) {
     fs_.mkdirSync(path.join('.', 'db'))
     fs_.writeFileSync(path.join('.', 'db', 'todos.json'), JSON.stringify({"data": []}))
 }
-
-router.get('/events', sse.init)
 
 router.get('/', (req, res) => {
     fs.readFile(databaseFilename)
@@ -66,7 +61,6 @@ router.put('/:id(\\d+)', (req, res) => {
         res.json({
             message: 'ok'
         })
-        sse.send('update')
     })
 })
 
@@ -82,11 +76,7 @@ router.post('/', (req, res) => {
         return fs.writeFile(databaseFilename, JSON.stringify(database))
     })
     .then(() => {
-        res.json({
-            message: 'ok',
-            data: todo
-        })
-        sse.send('update')
+        res.json(todo)
     })
 })
 
@@ -102,7 +92,6 @@ router.delete('/:id(\\d+)', (req, res) => {
                 res.json({
                     message: 'ok'
                 })
-                sse.send('update')
             })        
         } else {
             res.status(404).json({
