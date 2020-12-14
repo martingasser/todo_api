@@ -83,7 +83,8 @@ router.post('/', (req, res) => {
     })
     .then(() => {
         res.json({
-            message: 'ok'
+            message: 'ok',
+            data: todo
         })
         sse.send('update')
     })
