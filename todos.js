@@ -12,6 +12,15 @@ if (! fs_.existsSync(path.join('.', 'db'))) {
 }
 
 router.get('/', (req, res) => {
+
+    res.wss.clients.forEach(client => {
+
+        const obj = {
+            message: 'Hello'
+        }
+        client.send(JSON.stringify(obj))
+    })
+
     fs.readFile(databaseFilename)
     .then(file => {
         const database = JSON.parse(file)
@@ -20,7 +29,7 @@ router.get('/', (req, res) => {
 })
 
 
-router.get('/:id(\\d+)', (req, res) => {
+router.get('/:id(\\d+)', (req, res) => {    
     fs.readFile(databaseFilename)
     .then(file => {
         const database = JSON.parse(file)
@@ -58,6 +67,12 @@ router.put('/:id(\\d+)', (req, res) => {
         return fs.writeFile(databaseFilename, JSON.stringify(database))
     })
     .then(() => {
+        res.wss.clients.forEach(client => {
+            client.send(JSON.stringify({
+                message: 'update_todo',
+                todo: todo
+            }))
+        })
         res.json({
             message: 'ok'
         })
@@ -76,6 +91,12 @@ router.post('/', (req, res) => {
         return fs.writeFile(databaseFilename, JSON.stringify(database))
     })
     .then(() => {
+        res.wss.clients.forEach(client => {
+            client.send(JSON.stringify({
+                message: 'add_todo',
+                todo: todo
+            }))
+        })
         res.json(todo)
     })
 })
@@ -89,6 +110,12 @@ router.delete('/:id(\\d+)', (req, res) => {
             database.data = data
             return fs.writeFile(databaseFilename, JSON.stringify(database))
             .then(() => {
+                res.wss.clients.forEach(client => {
+                    client.send(JSON.stringify({
+                        message: 'delete_todo',
+                        todo_id: req.params.id
+                    }))
+                })
                 res.json({
                     message: 'ok'
                 })

@@ -1,4 +1,5 @@
 const app = require('express')()
+const ws = require('ws')
 
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -13,6 +14,13 @@ app.use(cors(corsOptions))
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
+const wsServer = new ws.Server({ noServer: true });
+
+app.use((req, res, next) => {
+    res.wss = wsServer
+    next()
+})
+
 app.use('/todos', todos)
 
 app.get('/', (req, res) => {
@@ -25,8 +33,21 @@ const http = require('http').createServer(app)
 
 const PORT = process.env.PORT || 8081
 
+wsServer.on('connection', socket => {
+    socket.on('message', message => console.log(message));
+})
+
 const server = http.listen(PORT, () => {
     console.log(`Server running on port ${PORT}.`)
+})
+
+server.on('upgrade', (request, socket, head) => {
+    // const ip = request.socket.remoteAddress
+    // const port = request.socket.remotePort
+    // console.log(ip, port)
+    wsServer.handleUpgrade(request, socket, head, socket => {
+        wsServer.emit('connection', socket, request)
+    })
 })
 
 function exitHandler(exitCode) {
