@@ -12,15 +12,6 @@ if (! fs_.existsSync(path.join('.', 'db'))) {
 }
 
 router.get('/', (req, res) => {
-
-    res.wss.clients.forEach(client => {
-
-        const obj = {
-            message: 'Hello'
-        }
-        client.send(JSON.stringify(obj))
-    })
-
     fs.readFile(databaseFilename)
     .then(file => {
         const database = JSON.parse(file)
@@ -28,8 +19,19 @@ router.get('/', (req, res) => {
     })
 })
 
+router.get('/colour', (req, res) => {
+    const colour = [
+        Math.round(Math.random()*256),
+        Math.round(Math.random()*256),
+        Math.round(Math.random()*256)
+    ]
 
-router.get('/:id(\\d+)', (req, res) => {    
+    res.json({
+        colour
+    })
+})
+
+router.get('/:id(\\d+)', (req, res) => {
     fs.readFile(databaseFilename)
     .then(file => {
         const database = JSON.parse(file)
