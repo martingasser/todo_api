@@ -3,22 +3,22 @@ const fs = require('fs').promises
 const fs_ = require('fs')
 
 class UsersDB {
-    constructor () {
+    constructor() {
         this.databaseFilename = path.join('.', 'db', 'users.json')
 
-        if (! fs_.existsSync(path.join('.', 'db'))) {
+        if (!fs_.existsSync(path.join('.', 'db'))) {
             fs_.mkdirSync(path.join('.', 'db'))
         }
 
-        if (! fs_.existsSync(this.databaseFilename)) {
-            fs_.writeFileSync(this.databaseFilename, JSON.stringify({"data": []}))
+        if (!fs_.existsSync(this.databaseFilename)) {
+            fs_.writeFileSync(this.databaseFilename, JSON.stringify({ "data": [] }))
         }
     }
 
-    getAllUsers () {
+    getAllUsers() {
         return fs.readFile(this.databaseFilename)
-        .then(file => JSON.parse(file))
-        .then(json => json.data)
+            .then(file => JSON.parse(file))
+            .then(json => json.data)
     }
 
     getUser(username) {
@@ -35,11 +35,11 @@ class UsersDB {
 
     createUser(user) {
         return fs.readFile(this.databaseFilename)
-        .then(file => JSON.parse(file))
-        .then(database => {
-            database.data.push(user)
-            return fs.writeFile(this.databaseFilename, JSON.stringify(database))
-        })
+            .then(file => JSON.parse(file))
+            .then(database => {
+                database.data.push(user)
+                return fs.writeFile(this.databaseFilename, JSON.stringify(database))
+            })
     }
 }
 

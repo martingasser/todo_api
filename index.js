@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const todos = require('./todos')
+const users = require('./users')
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -21,6 +22,7 @@ app.use((req, res, next) => {
 })
 
 app.use('/todos', todos)
+app.use('/users', users)
 
 app.get('/', (req, res) => {
     res.json({

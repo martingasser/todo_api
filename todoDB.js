@@ -3,19 +3,19 @@ const fs = require('fs').promises
 const fs_ = require('fs')
 
 class TodoDB {
-    constructor () {
+    constructor() {
 
         this.databaseFilename = path.join('.', 'db', 'todos.json')
 
-        if (! fs_.existsSync(path.join('.', 'db'))) {
+        if (!fs_.existsSync(path.join('.', 'db'))) {
             fs_.mkdirSync(path.join('.', 'db'))
-            fs_.writeFileSync(this.databaseFilename, JSON.stringify({"data": []}))
+            fs_.writeFileSync(this.databaseFilename, JSON.stringify({ "data": [] }))
         }
     }
 
-    getAllTodos () {
+    getAllTodos() {
         return fs.readFile(this.databaseFilename)
-        .then(file => JSON.parse(file))
+            .then(file => JSON.parse(file))
     }
 
     getTodo(id) {
@@ -32,44 +32,44 @@ class TodoDB {
 
     updateTodo(todo) {
         return fs.readFile(this.databaseFilename)
-        .then(file => JSON.parse(file))
-        .then(database => {
-            const found = database.data.find(t => (t.id == todo.id))
+            .then(file => JSON.parse(file))
+            .then(database => {
+                const found = database.data.find(t => (t.id == todo.id))
 
-            if (found === undefined) {
-                database.data.push(todo)
-            } else {
-                database.data = database.data.map(t => {
-                    if (t.id == todo.id) {
-                        return { ...t, ...todo }
-                    }
-                    return t
-                })
-            }
-            return fs.writeFile(this.databaseFilename, JSON.stringify(database))
-        })
+                if (found === undefined) {
+                    database.data.push(todo)
+                } else {
+                    database.data = database.data.map(t => {
+                        if (t.id == todo.id) {
+                            return { ...t, ...todo }
+                        }
+                        return t
+                    })
+                }
+                return fs.writeFile(this.databaseFilename, JSON.stringify(database))
+            })
     }
 
     createTodo(todo) {
         return fs.readFile(this.databaseFilename)
-        .then(file => JSON.parse(file))
-        .then(database => {
-            database.data.push(todo)
-            return fs.writeFile(this.databaseFilename, JSON.stringify(database))
-        })
+            .then(file => JSON.parse(file))
+            .then(database => {
+                database.data.push(todo)
+                return fs.writeFile(this.databaseFilename, JSON.stringify(database))
+            })
     }
 
     deleteTodo(id) {
         return fs.readFile(this.databaseFilename)
-        .then(file => JSON.parse(file))
-        .then(database => {
-            const data = database.data.filter(d => (d.id != id))
-            if (data.length !== database.data.length) {
-                database.data = data
-                return fs.writeFile(this.databaseFilename, JSON.stringify(database))
-            }
-            throw new Error('Not found')
-        })
+            .then(file => JSON.parse(file))
+            .then(database => {
+                const data = database.data.filter(d => (d.id != id))
+                if (data.length !== database.data.length) {
+                    database.data = data
+                    return fs.writeFile(this.databaseFilename, JSON.stringify(database))
+                }
+                throw new Error('Not found')
+            })
     }
 }
 
