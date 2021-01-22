@@ -1,6 +1,7 @@
+const config = require('config')
+
 const app = require('express')()
 const ws = require('ws')
-
 const bodyParser = require('body-parser')
 const cors = require('cors')
 
@@ -30,7 +31,7 @@ app.get('/', (req, res) => {
     })
 })
 
-const PORT = process.env.PORT || 8081
+const PORT = config.has('PORT') ? config.get('PORT') : 8080
 
 wsServer.on('connection', socket => {
     socket.on('message', message => console.log(message));
